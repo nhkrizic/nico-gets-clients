@@ -9,6 +9,7 @@ import AuthModal from "@/components/AuthModal";
 import LiveChatModal from "@/components/LiveChatModal";
 import PaymentModal from "@/components/PaymentModal";
 import BlogModal from "@/components/BlogModal";
+import UserPostsSection from "@/components/UserPostsSection";
 
 const Index = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -27,6 +28,7 @@ const Index = () => {
       
       <HeroSection />
       <ServicesSection />
+      <UserPostsSection />
       <AboutSection />
       <ContactSection />
       <Footer />

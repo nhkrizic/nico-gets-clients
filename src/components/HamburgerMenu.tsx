@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Menu, X, User, MessageCircle, Calendar, BookOpen, CreditCard, Shield, LogIn, UserPlus } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Menu, X, User, MessageCircle, Calendar, BookOpen, CreditCard, Shield, LogIn, UserPlus, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HamburgerMenuProps {
   onLoginClick: () => void;
@@ -13,6 +15,7 @@ interface HamburgerMenuProps {
 
 const HamburgerMenu = ({ onLoginClick, onChatClick, onBlogClick, onPaymentClick }: HamburgerMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const handleMenuClick = (action: () => void) => {
     action();
@@ -52,22 +55,55 @@ const HamburgerMenu = ({ onLoginClick, onChatClick, onBlogClick, onPaymentClick 
                 Account
               </h3>
               <div className="space-y-2">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start hover:bg-primary/10 hover:text-primary transition-colors"
-                  onClick={() => handleMenuClick(onLoginClick)}
-                >
-                  <LogIn className="mr-3 h-5 w-5" />
-                  Client Login
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start hover:bg-accent/10 hover:text-accent transition-colors"
-                  onClick={() => handleMenuClick(onLoginClick)}
-                >
-                  <UserPlus className="mr-3 h-5 w-5" />
-                  Register Account
-                </Button>
+                {user ? (
+                  // Logged in user display
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={user.user_metadata?.avatar_url} />
+                        <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+                          {user.email?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {user.user_metadata?.full_name || user.email}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start hover:bg-destructive/10 hover:text-destructive transition-colors"
+                      onClick={() => handleMenuClick(signOut)}
+                    >
+                      <LogOut className="mr-3 h-5 w-5" />
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  // Not logged in - show login/register
+                  <div className="space-y-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={() => handleMenuClick(onLoginClick)}
+                    >
+                      <LogIn className="mr-3 h-5 w-5" />
+                      Client Login
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start hover:bg-accent/10 hover:text-accent transition-colors"
+                      onClick={() => handleMenuClick(onLoginClick)}
+                    >
+                      <UserPlus className="mr-3 h-5 w-5" />
+                      Register Account
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Calendar, User, MessageSquare, Heart, Share2, Search, Plus } from "lucide-react";
+import { BookOpen, Calendar, User, MessageSquare, Heart, Share2, Search, Plus, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface BlogModalProps {
   isOpen: boolean;
@@ -71,6 +72,7 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
     category: 'Tips & Tricks'
   });
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const filteredPosts = posts.filter(post => {
     const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
@@ -80,6 +82,15 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
   });
 
   const handleSubmitPost = async () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "You must be logged in to create a blog post.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!newPost.title || !newPost.content) {
       toast({
         title: "Missing Information",
@@ -89,14 +100,12 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
       return;
     }
 
-    // Connect to your SQL Server backend API
-    // Example: POST /api/blog/posts
     try {
       const post: BlogPost = {
         id: Date.now().toString(),
         title: newPost.title,
         content: newPost.content,
-        author: "Guest User", // Replace with actual user data
+        author: user.user_metadata?.full_name || user.email || "User",
         date: new Date(),
         category: newPost.category,
         likes: 0,
@@ -156,8 +165,9 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
               size="sm"
               onClick={() => setActiveTab('write')}
               className={activeTab === 'write' ? 'bg-accent' : ''}
+              disabled={!user}
             >
-              <Plus className="w-4 h-4 mr-1" />
+              {!user ? <Lock className="w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
               Write Post
             </Button>
           </div>
@@ -274,11 +284,26 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
             </div>
           ) : (
             <div className="h-full p-6 overflow-y-auto">
-              <div className="max-w-2xl mx-auto space-y-6">
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Create New Post</h3>
-                  <p className="text-muted-foreground">Share your knowledge with the community</p>
+              {!user ? (
+                <div className="max-w-2xl mx-auto text-center py-20">
+                  <Lock className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Login Required</h3>
+                  <p className="text-muted-foreground mb-6">
+                    You need to be logged in to create blog posts and share your knowledge with the community.
+                  </p>
+                  <Button 
+                    onClick={onClose}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    Go to Login
+                  </Button>
                 </div>
+              ) : (
+                <div className="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Create New Post</h3>
+                    <p className="text-muted-foreground">Share your knowledge with the community</p>
+                  </div>
 
                 <div className="space-y-4">
                   <div>
@@ -337,9 +362,10 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
                     >
                       Clear Form
                     </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
