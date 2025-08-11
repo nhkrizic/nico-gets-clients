@@ -7,6 +7,13 @@ const HeroSection = () => {
     window.location.href = 'tel:+41798874423';
   };
 
+  const handleConsultationClick = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
       {/* Background with gradient overlay */}
@@ -36,6 +43,7 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
               size="lg" 
+              onClick={handleConsultationClick}
               className="bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent text-accent-foreground font-semibold px-8 py-6 text-lg rounded-full shadow-glow hover:shadow-intense transition-all duration-300 hover:scale-105"
             >
               Get Free Consultation

@@ -1,8 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, Wrench, Shield, Smartphone, ArrowRight } from "lucide-react";
+import { Globe, Wrench, Shield, Smartphone, ArrowRight, Server, Database, Cloud, Monitor, Cpu, HardDrive, Wifi, Lock } from "lucide-react";
+import { useState } from "react";
 
-const services = [
+const mainServices = [
   {
     icon: Globe,
     title: "Web Development",
@@ -29,7 +30,60 @@ const services = [
   }
 ];
 
+const additionalServices = [
+  {
+    icon: Server,
+    title: "Server Management",
+    description: "Professional server setup, maintenance, and monitoring services for optimal performance.",
+    features: ["Server Setup", "24/7 Monitoring", "Performance Optimization", "Backup Solutions"]
+  },
+  {
+    icon: Database,
+    title: "Database Services",
+    description: "Database design, optimization, and management for efficient data handling and storage.",
+    features: ["Database Design", "Performance Tuning", "Data Migration", "Backup & Recovery"]
+  },
+  {
+    icon: Cloud,
+    title: "Cloud Solutions",
+    description: "Cloud migration, management, and optimization for scalable and reliable infrastructure.",
+    features: ["Cloud Migration", "Cost Optimization", "Auto-scaling", "Multi-cloud Strategy"]
+  },
+  {
+    icon: Monitor,
+    title: "System Monitoring",
+    description: "24/7 system monitoring and alerting to prevent issues before they impact your business.",
+    features: ["Real-time Monitoring", "Custom Alerts", "Performance Analytics", "Incident Response"]
+  },
+  {
+    icon: Cpu,
+    title: "Performance Optimization",
+    description: "Comprehensive system performance analysis and optimization for maximum efficiency.",
+    features: ["Speed Optimization", "Resource Management", "Bottleneck Analysis", "Capacity Planning"]
+  },
+  {
+    icon: HardDrive,
+    title: "Data Recovery",
+    description: "Professional data recovery services for all types of storage devices and data loss scenarios.",
+    features: ["Hard Drive Recovery", "RAID Recovery", "SSD Recovery", "Emergency Service"]
+  },
+  {
+    icon: Wifi,
+    title: "Network Infrastructure",
+    description: "Complete network design, implementation, and management for businesses of all sizes.",
+    features: ["Network Design", "WiFi Setup", "VPN Configuration", "Network Troubleshooting"]
+  },
+  {
+    icon: Lock,
+    title: "Cybersecurity Consulting",
+    description: "Comprehensive security assessments and implementation of robust cybersecurity measures.",
+    features: ["Security Assessments", "Penetration Testing", "Compliance Audits", "Security Training"]
+  }
+];
+
 const ServicesSection = () => {
+  const [showAllServices, setShowAllServices] = useState(false);
+  const displayedServices = showAllServices ? [...mainServices, ...additionalServices] : mainServices;
   return (
     <section id="services" className="py-20 bg-gradient-to-b from-background to-secondary/30">
       <div className="container mx-auto px-4">
@@ -43,8 +97,8 @@ const ServicesSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {services.map((service, index) => {
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 transition-all duration-500 ${showAllServices ? 'lg:grid-cols-3' : ''}`}>
+          {displayedServices.map((service, index) => {
             const Icon = service.icon;
             return (
               <Card 
@@ -80,10 +134,11 @@ const ServicesSection = () => {
         <div className="text-center">
           <Button 
             size="lg" 
+            onClick={() => setShowAllServices(!showAllServices)}
             className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
-            View All Services
-            <ArrowRight className="ml-2 h-5 w-5" />
+            {showAllServices ? 'Show Core Services' : 'View All Services'}
+            <ArrowRight className={`ml-2 h-5 w-5 transition-transform duration-300 ${showAllServices ? 'rotate-180' : ''}`} />
           </Button>
         </div>
       </div>

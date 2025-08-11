@@ -10,6 +10,7 @@ import LiveChatModal from "@/components/LiveChatModal";
 import PaymentModal from "@/components/PaymentModal";
 import BlogModal from "@/components/BlogModal";
 import RecentPostsSection from "@/components/UserPostsSection";
+import CookieConsent from "@/components/CookieConsent";
 
 const Index = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -38,6 +39,9 @@ const Index = () => {
       <LiveChatModal isOpen={chatModalOpen} onClose={() => setChatModalOpen(false)} />
       <PaymentModal isOpen={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} />
       <BlogModal isOpen={blogModalOpen} onClose={() => setBlogModalOpen(false)} />
+      
+      {/* Cookie Consent Banner */}
+      <CookieConsent />
     </div>
   );
 };
