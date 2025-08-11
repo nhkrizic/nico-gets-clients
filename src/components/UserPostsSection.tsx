@@ -16,7 +16,7 @@ interface RecentPostsSectionProps {
 const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { posts, loading, toggleLike, fetchComments, addComment } = useBlog();
+  const { posts, loading = false, toggleLike, fetchComments, addComment } = useBlog();
   
   const [commentModal, setCommentModal] = useState<{
     isOpen: boolean;
