@@ -5,51 +5,9 @@ import { BookOpen, Calendar, User, MessageSquare, Heart, Share2 } from "lucide-r
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  date: Date;
-  category: string;
-  likes: number;
-  comments: number;
-}
-
-// Recent community posts - in real app this would come from your database
-const mockRecentPosts: BlogPost[] = [
-  {
-    id: "1",
-    title: "Top 10 Web Development Trends in 2024",
-    content: "Discover the latest trends in web development that are shaping the digital landscape. From AI integration to advanced CSS features, here's what every developer should know...",
-    author: "Nico",
-    date: new Date("2024-01-15"),
-    category: "Web Development",
-    likes: 24,
-    comments: 8
-  },
-  {
-    id: "2",
-    title: "How to Secure Your Home Network",
-    content: "Learn essential steps to protect your home network from cyber threats. This comprehensive guide covers router security, password management, and monitoring tools...",
-    author: "Nico",
-    date: new Date("2024-01-12"),
-    category: "Network Security",
-    likes: 18,
-    comments: 5
-  },
-  {
-    id: "3",
-    title: "Common Computer Issues and Quick Fixes",
-    content: "Running into computer problems? Here are the most common issues and how to solve them quickly without calling for help. Save time and money with these pro tips...",
-    author: "Tech Support Team",
-    date: new Date("2024-01-10"),
-    category: "IT Repairs",
-    likes: 32,
-    comments: 12
-  }
-];
+import { useBlog } from "@/hooks/useBlog";
+import CommentModal from "@/components/CommentModal";
+import ShareModal from "@/components/ShareModal";
 
 interface RecentPostsSectionProps {
   onBlogClick: () => void;
@@ -58,40 +16,56 @@ interface RecentPostsSectionProps {
 const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [posts, setPosts] = useState(mockRecentPosts);
-  const handleLike = (postId: string) => {
+  const { posts, loading, toggleLike, fetchComments, addComment } = useBlog();
+  
+  const [commentModal, setCommentModal] = useState<{
+    isOpen: boolean;
+    postId: string;
+    postTitle: string;
+    comments: any[];
+  }>({
+    isOpen: false,
+    postId: '',
+    postTitle: '',
+    comments: []
+  });
+  
+  const [shareModal, setShareModal] = useState<{
+    isOpen: boolean;
+    postTitle: string;
+    postContent: string;
+  }>({
+    isOpen: false,
+    postTitle: '',
+    postContent: ''
+  });
+
+  const displayPosts = posts.slice(0, 3); // Show only first 3 posts
+
+  const handleComment = async (postId: string, postTitle: string) => {
     if (!user) {
       toast({
         title: "Login Required",
-        description: "You must be logged in to like posts.",
+        description: "You must be logged in to view comments.",
         variant: "destructive",
       });
       return;
     }
 
-    setPosts(prev => prev.map(post => 
-      post.id === postId ? { ...post, likes: post.likes + 1 } : post
-    ));
-
-    toast({
-      title: "Post Liked!",
-      description: "Thanks for your feedback.",
+    const comments = await fetchComments(postId);
+    setCommentModal({
+      isOpen: true,
+      postId,
+      postTitle,
+      comments
     });
   };
 
-  const handleComment = () => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "You must be logged in to comment on posts.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Coming Soon",
-      description: "Comment functionality will be available soon!",
+  const handleShare = (postTitle: string, postContent: string) => {
+    setShareModal({
+      isOpen: true,
+      postTitle,
+      postContent
     });
   };
 
@@ -107,77 +81,87 @@ const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {posts.map((post) => (
-            <Card key={post.id} className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-card to-card/50 border-border">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start mb-2">
-                  <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
-                    {post.category}
-                  </Badge>
-                </div>
-                <CardTitle className="text-xl hover:text-primary transition-colors cursor-pointer">
-                  {post.title}
-                </CardTitle>
-                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                  <span className="flex items-center">
-                    <User className="w-4 h-4 mr-1" />
-                    {post.author}
-                  </span>
-                  <span className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {post.date.toLocaleDateString()}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base leading-relaxed mb-4">
-                  {post.content}
-                </CardDescription>
-                <div className="flex items-center justify-between pt-3 border-t border-border">
-                        <div className="flex space-x-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleLike(post.id)}
-                            className={`transition-colors ${
-                              user 
-                                ? "text-muted-foreground hover:text-red-500" 
-                                : "text-muted-foreground/50 cursor-not-allowed"
-                            }`}
-                            disabled={!user}
-                          >
-                            <Heart className="w-4 h-4 mr-1" />
-                            {post.likes}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleComment}
-                            className={`transition-colors ${
-                              user 
-                                ? "text-muted-foreground hover:text-primary" 
-                                : "text-muted-foreground/50 cursor-not-allowed"
-                            }`}
-                            disabled={!user}
-                          >
-                            <MessageSquare className="w-4 h-4 mr-1" />
-                            {post.comments}
-                          </Button>
-                        </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-accent transition-colors"
-                  >
-                    <Share2 className="w-4 h-4 mr-1" />
-                    Share
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading posts...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {displayPosts.map((post) => (
+              <Card key={post.id} className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-card to-card/50 border-border">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
+                      Tech Post
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl hover:text-primary transition-colors cursor-pointer">
+                    {post.title}
+                  </CardTitle>
+                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                    <span className="flex items-center">
+                      <User className="w-4 h-4 mr-1" />
+                      Anonymous
+                    </span>
+                    <span className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {new Date(post.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base leading-relaxed mb-4">
+                    {post.content.length > 150 ? `${post.content.substring(0, 150)}...` : post.content}
+                  </CardDescription>
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                    <div className="flex space-x-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleLike(post.id)}
+                        className={`transition-colors ${
+                          user 
+                            ? post.user_has_liked
+                              ? "text-red-500 hover:text-red-600"
+                              : "text-muted-foreground hover:text-red-500"
+                            : "text-muted-foreground/50 cursor-not-allowed"
+                        }`}
+                        disabled={!user}
+                      >
+                        <Heart className={`w-4 h-4 mr-1 ${post.user_has_liked ? 'fill-current' : ''}`} />
+                        {post.likes_count || 0}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleComment(post.id, post.title)}
+                        className={`transition-colors ${
+                          user 
+                            ? "text-muted-foreground hover:text-primary" 
+                            : "text-muted-foreground/50 cursor-not-allowed"
+                        }`}
+                        disabled={!user}
+                      >
+                        <MessageSquare className="w-4 h-4 mr-1" />
+                        {post.comments_count || 0}
+                      </Button>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleShare(post.title, post.content)}
+                      className="text-muted-foreground hover:text-accent transition-colors"
+                    >
+                      <Share2 className="w-4 h-4 mr-1" />
+                      Share
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         <div className="text-center mt-12">
           <Button 
@@ -189,6 +173,25 @@ const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
             View All Posts
           </Button>
         </div>
+
+        {/* Comment Modal */}
+        <CommentModal
+          isOpen={commentModal.isOpen}
+          onClose={() => setCommentModal(prev => ({ ...prev, isOpen: false }))}
+          postId={commentModal.postId}
+          postTitle={commentModal.postTitle}
+          comments={commentModal.comments}
+          onAddComment={addComment}
+          onRefreshComments={fetchComments}
+        />
+
+        {/* Share Modal */}
+        <ShareModal
+          isOpen={shareModal.isOpen}
+          onClose={() => setShareModal(prev => ({ ...prev, isOpen: false }))}
+          postTitle={shareModal.postTitle}
+          postContent={shareModal.postContent}
+        />
       </div>
     </section>
   );

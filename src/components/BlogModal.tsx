@@ -9,63 +9,21 @@ import { Separator } from "@/components/ui/separator";
 import { BookOpen, Calendar, User, MessageSquare, Heart, Share2, Search, Plus, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useBlog } from "@/hooks/useBlog";
+import CommentModal from "@/components/CommentModal";
+import ShareModal from "@/components/ShareModal";
 
 interface BlogModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  date: Date;
-  category: string;
-  likes: number;
-  comments: number;
-}
-
 const categories = ["All", "Web Development", "IT Repairs", "Network Security", "Tips & Tricks", "Industry News"];
-
-const mockPosts: BlogPost[] = [
-  {
-    id: "1",
-    title: "Top 10 Web Development Trends in 2024",
-    content: "Discover the latest trends in web development that are shaping the digital landscape. From AI integration to advanced CSS features...",
-    author: "Nico",
-    date: new Date("2024-01-15"),
-    category: "Web Development",
-    likes: 24,
-    comments: 8
-  },
-  {
-    id: "2",
-    title: "How to Secure Your Home Network",
-    content: "Learn essential steps to protect your home network from cyber threats. This comprehensive guide covers router security, password management...",
-    author: "Nico",
-    date: new Date("2024-01-12"),
-    category: "Network Security",
-    likes: 18,
-    comments: 5
-  },
-  {
-    id: "3",
-    title: "Common Computer Issues and Quick Fixes",
-    content: "Running into computer problems? Here are the most common issues and how to solve them quickly without calling for help...",
-    author: "Tech Support Team",
-    date: new Date("2024-01-10"),
-    category: "IT Repairs",
-    likes: 32,
-    comments: 12
-  }
-];
 
 const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
   const [activeTab, setActiveTab] = useState<'read' | 'write'>('read');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [posts, setPosts] = useState<BlogPost[]>(mockPosts);
   const [newPost, setNewPost] = useState({
     title: '',
     content: '',
@@ -73,9 +31,32 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
   });
   const { toast } = useToast();
   const { user } = useAuth();
+  const { posts, loading, createPost, toggleLike, fetchComments, addComment } = useBlog();
+  
+  const [commentModal, setCommentModal] = useState<{
+    isOpen: boolean;
+    postId: string;
+    postTitle: string;
+    comments: any[];
+  }>({
+    isOpen: false,
+    postId: '',
+    postTitle: '',
+    comments: []
+  });
+  
+  const [shareModal, setShareModal] = useState<{
+    isOpen: boolean;
+    postTitle: string;
+    postContent: string;
+  }>({
+    isOpen: false,
+    postTitle: '',
+    postContent: ''
+  });
 
   const filteredPosts = posts.filter(post => {
-    const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'All' || true; // Remove category filtering for now
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.content.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -100,68 +81,37 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
       return;
     }
 
-    try {
-      const post: BlogPost = {
-        id: Date.now().toString(),
-        title: newPost.title,
-        content: newPost.content,
-        author: user.user_metadata?.full_name || user.email || "User",
-        date: new Date(),
-        category: newPost.category,
-        likes: 0,
-        comments: 0
-      };
-
-      setPosts(prev => [post, ...prev]);
+    const success = await createPost(newPost.title, newPost.content, newPost.category);
+    if (success) {
       setNewPost({ title: '', content: '', category: 'Tips & Tricks' });
       setActiveTab('read');
-
-      toast({
-        title: "Post Published!",
-        description: "Your blog post has been published successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Publishing Failed",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
     }
   };
 
-  const handleLike = (postId: string) => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "You must be logged in to like posts.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setPosts(prev => prev.map(post => 
-      post.id === postId ? { ...post, likes: post.likes + 1 } : post
-    ));
-
-    toast({
-      title: "Post Liked!",
-      description: "Thanks for your feedback.",
-    });
-  };
-
-  const handleComment = () => {
+  const handleComment = async (postId: string, postTitle: string) => {
     if (!user) {
       toast({
         title: "Login Required", 
-        description: "You must be logged in to comment on posts.",
+        description: "You must be logged in to view comments.",
         variant: "destructive",
       });
       return;
     }
 
-    toast({
-      title: "Coming Soon",
-      description: "Comment functionality will be available soon!",
+    const comments = await fetchComments(postId);
+    setCommentModal({
+      isOpen: true,
+      postId,
+      postTitle,
+      comments
+    });
+  };
+
+  const handleShare = (postTitle: string, postContent: string) => {
+    setShareModal({
+      isOpen: true,
+      postTitle,
+      postContent
     });
   };
 
@@ -242,7 +192,12 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
 
               {/* Posts List */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {filteredPosts.length === 0 ? (
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading posts...</p>
+                  </div>
+                ) : filteredPosts.length === 0 ? (
                   <div className="text-center py-12">
                     <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <p className="text-muted-foreground">No posts found matching your criteria.</p>
@@ -259,22 +214,22 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
                             <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
                               <span className="flex items-center">
                                 <User className="w-4 h-4 mr-1" />
-                                {post.author}
+                                Anonymous
                               </span>
                               <span className="flex items-center">
                                 <Calendar className="w-4 h-4 mr-1" />
-                                {post.date.toLocaleDateString()}
+                                {new Date(post.created_at).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
                           <Badge variant="secondary" className="ml-4">
-                            {post.category}
+                            Tech Post
                           </Badge>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <CardDescription className="text-base leading-relaxed mb-4">
-                          {post.content}
+                          {post.content.length > 200 ? `${post.content.substring(0, 200)}...` : post.content}
                         </CardDescription>
                         <Separator className="my-3" />
                         <div className="flex items-center justify-between">
@@ -282,21 +237,23 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleLike(post.id)}
+                              onClick={() => toggleLike(post.id)}
                               className={`transition-colors ${
                                 user 
-                                  ? "text-muted-foreground hover:text-red-500" 
+                                  ? post.user_has_liked
+                                    ? "text-red-500 hover:text-red-600"
+                                    : "text-muted-foreground hover:text-red-500"
                                   : "text-muted-foreground/50 cursor-not-allowed"
                               }`}
                               disabled={!user}
                             >
-                              <Heart className="w-4 h-4 mr-1" />
-                              {post.likes}
+                              <Heart className={`w-4 h-4 mr-1 ${post.user_has_liked ? 'fill-current' : ''}`} />
+                              {post.likes_count || 0}
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={handleComment}
+                              onClick={() => handleComment(post.id, post.title)}
                               className={`transition-colors ${
                                 user 
                                   ? "text-muted-foreground hover:text-primary" 
@@ -305,12 +262,13 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
                               disabled={!user}
                             >
                               <MessageSquare className="w-4 h-4 mr-1" />
-                              {post.comments}
+                              {post.comments_count || 0}
                             </Button>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => handleShare(post.title, post.content)}
                             className="text-muted-foreground hover:text-accent transition-colors"
                           >
                             <Share2 className="w-4 h-4 mr-1" />
@@ -346,63 +304,63 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
                     <p className="text-muted-foreground">Share your knowledge with the community</p>
                   </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Post Title</label>
-                    <Input
-                      value={newPost.title}
-                      onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Enter an engaging title for your post"
-                      className="bg-background/50 border-border focus:border-primary"
-                    />
-                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Post Title</label>
+                      <Input
+                        value={newPost.title}
+                        onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="Enter an engaging title for your post"
+                        className="bg-background/50 border-border focus:border-primary"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Category</label>
-                    <select
-                      value={newPost.category}
-                      onChange={(e) => setNewPost(prev => ({ ...prev, category: e.target.value }))}
-                      className="w-full p-2 rounded-md bg-background/50 border border-border focus:border-primary focus:outline-none"
-                    >
-                      {categories.slice(1).map((category) => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-                  </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Category</label>
+                      <select
+                        value={newPost.category}
+                        onChange={(e) => setNewPost(prev => ({ ...prev, category: e.target.value }))}
+                        className="w-full p-2 rounded-md bg-background/50 border border-border focus:border-primary focus:outline-none"
+                      >
+                        {categories.slice(1).map((category) => (
+                          <option key={category} value={category}>{category}</option>
+                        ))}
+                      </select>
+                    </div>
 
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Content</label>
-                    <Textarea
-                      value={newPost.content}
-                      onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
-                      placeholder="Write your post content here... Share tips, tutorials, or insights that could help others!"
-                      className="min-h-[300px] bg-background/50 border-border focus:border-primary resize-none"
-                    />
-                  </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Content</label>
+                      <Textarea
+                        value={newPost.content}
+                        onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
+                        placeholder="Write your post content here... Share tips, tutorials, or insights that could help others!"
+                        className="min-h-[300px] bg-background/50 border-border focus:border-primary resize-none"
+                      />
+                    </div>
 
-                  <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
-                    <h4 className="font-medium mb-2">Community Guidelines</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Keep content relevant to IT, technology, and professional services</li>
-                      <li>• Be respectful and constructive in your communications</li>
-                      <li>• Share knowledge that could genuinely help others</li>
-                      <li>• Avoid promotional content unless it provides clear value</li>
-                    </ul>
-                  </div>
+                    <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                      <h4 className="font-medium mb-2">Community Guidelines</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        <li>• Keep content relevant to IT, technology, and professional services</li>
+                        <li>• Be respectful and constructive in your communications</li>
+                        <li>• Share knowledge that could genuinely help others</li>
+                        <li>• Avoid promotional content unless it provides clear value</li>
+                      </ul>
+                    </div>
 
-                  <div className="flex space-x-3 pt-4">
-                    <Button
-                      onClick={handleSubmitPost}
-                      className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent text-accent-foreground font-semibold px-8 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                      Publish Post
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setNewPost({ title: '', content: '', category: 'Tips & Tricks' })}
-                    >
-                      Clear Form
-                    </Button>
+                    <div className="flex space-x-3 pt-4">
+                      <Button
+                        onClick={handleSubmitPost}
+                        className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent text-accent-foreground font-semibold px-8 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        Publish Post
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setNewPost({ title: '', content: '', category: 'Tips & Tricks' })}
+                      >
+                        Clear Form
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -410,6 +368,25 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
             </div>
           )}
         </div>
+
+        {/* Comment Modal */}
+        <CommentModal
+          isOpen={commentModal.isOpen}
+          onClose={() => setCommentModal(prev => ({ ...prev, isOpen: false }))}
+          postId={commentModal.postId}
+          postTitle={commentModal.postTitle}
+          comments={commentModal.comments}
+          onAddComment={addComment}
+          onRefreshComments={fetchComments}
+        />
+
+        {/* Share Modal */}
+        <ShareModal
+          isOpen={shareModal.isOpen}
+          onClose={() => setShareModal(prev => ({ ...prev, isOpen: false }))}
+          postTitle={shareModal.postTitle}
+          postContent={shareModal.postContent}
+        />
       </DialogContent>
     </Dialog>
   );
