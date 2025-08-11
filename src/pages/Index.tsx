@@ -5,7 +5,7 @@ import AboutSection from "@/components/AboutSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import HamburgerMenu from "@/components/HamburgerMenu";
-import LoginModal from "@/components/LoginModal";
+import AuthModal from "@/components/AuthModal";
 import LiveChatModal from "@/components/LiveChatModal";
 import BookingModal from "@/components/BookingModal";
 import PaymentModal from "@/components/PaymentModal";
@@ -35,7 +35,7 @@ const Index = () => {
       <Footer />
 
       {/* Modals */}
-      <LoginModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
+      <AuthModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
       <LiveChatModal isOpen={chatModalOpen} onClose={() => setChatModalOpen(false)} />
       <BookingModal isOpen={bookingModalOpen} onClose={() => setBookingModalOpen(false)} />
       <PaymentModal isOpen={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} />

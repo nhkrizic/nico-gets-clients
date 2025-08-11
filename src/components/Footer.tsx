@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Globe, Mail, Phone, MapPin } from "lucide-react";
+import SocialMediaLinks from "@/components/SocialMediaLinks";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -18,6 +19,13 @@ const Footer = () => {
             <p className="text-primary-foreground/80 mb-6 leading-relaxed">
               Professional IT services and web development solutions delivered with Swiss precision and quality.
             </p>
+            <div className="mb-6">
+              <SocialMediaLinks 
+                variant="outline" 
+                size="sm" 
+                className="text-primary-foreground/80"
+              />
+            </div>
             <Button 
               variant="outline" 
               className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground hover:text-primary rounded-full"

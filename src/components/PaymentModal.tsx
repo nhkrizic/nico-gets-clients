@@ -70,17 +70,9 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
     setIsProcessing(true);
 
     try {
-      // Get the current user
+      // Get the current user (optional for guest payments)
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to make a payment.",
-          variant: "destructive",
-        });
-        return;
-      }
-
+      
       const totalAmount = service.price + Math.round(service.price * 0.081);
 
       // Call the payment processing edge function
@@ -90,8 +82,9 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
           amount: totalAmount * 100, // Convert to cents
           currency: 'chf',
           serviceId: service.id,
-          userId: user.id,
-          appointmentId: null // Optional: can be linked to an appointment later
+          userId: user?.id || null, // Allow null for guest payments
+          appointmentId: null, // Optional: can be linked to an appointment later
+          guestEmail: user?.email || 'guest@example.com' // Default email for guests
         }
       });
 

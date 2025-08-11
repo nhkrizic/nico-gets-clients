@@ -24,14 +24,17 @@ serve(async (req) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    const { paymentMethod, amount, currency, serviceId, userId, appointmentId } = await req.json()
+    const { paymentMethod, amount, currency, serviceId, userId, appointmentId, guestEmail } = await req.json()
 
-    // Validate required fields
-    if (!paymentMethod || !amount || !currency || !serviceId || !userId) {
+    // Validate required fields (userId is now optional for guest payments)
+    if (!paymentMethod || !amount || !currency || !serviceId) {
       throw new Error('Missing required payment fields')
     }
 
-    console.log('Processing payment:', { paymentMethod, amount, currency, serviceId, userId, appointmentId })
+    // Use guestEmail if no userId provided
+    const emailForPayment = userId ? null : (guestEmail || 'guest@example.com')
+
+    console.log('Processing payment:', { paymentMethod, amount, currency, serviceId, userId, appointmentId, guestEmail })
 
     // Get PayPal access token
     const getPayPalAccessToken = async () => {
@@ -85,7 +88,7 @@ serve(async (req) => {
         const { data: payment, error: paymentError } = await supabase
           .from('payments')
           .insert({
-            user_id: userId,
+            user_id: userId, // Can be null for guest payments
             amount: amount,
             currency: currency,
             payment_method: 'paypal',
@@ -119,7 +122,7 @@ serve(async (req) => {
       const { data: payment, error: paymentError } = await supabase
         .from('payments')
         .insert({
-          user_id: userId,
+          user_id: userId, // Can be null for guest payments
           amount: amount,
           currency: currency,
           payment_method: 'card',
