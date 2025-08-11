@@ -15,7 +15,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
       {/* Background with gradient overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center z-0 opacity-30"
@@ -24,8 +24,8 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/60" />
       </div>
       
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-20">
+      {/* Hero Content */}
+      <header className="relative z-10 container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-foreground">
             Professional
@@ -76,7 +76,7 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
-      </div>
+      </header>
       
       {/* Animated scroll indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-muted-foreground animate-bounce">
@@ -84,7 +84,7 @@ const HeroSection = () => {
           <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-pulse"></div>
         </div>
       </div>
-    </section>
+    </main>
   );
 };
 

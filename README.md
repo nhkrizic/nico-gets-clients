@@ -1,73 +1,87 @@
-# Welcome to your Lovable project
+# Nico IT Services - Professional IT Solutions
 
-## Project info
+Professional IT services website built with modern web technologies for Nico Krizic's IT business in Switzerland.
+
+## Services Offered
+
+- **Web Development**: Custom websites and web applications with modern technologies
+- **IT Repairs & Support**: Professional computer and device repairs, system optimization
+- **Network & Security**: Secure infrastructure setup and cybersecurity solutions
+- **Mobile Solutions**: Mobile app development and device management
+- **Server Management**: 24/7 monitoring and professional server maintenance
+- **Database Services**: Design, optimization, and management solutions
+- **Cloud Solutions**: Migration, management, and optimization services
+- **Cybersecurity Consulting**: Security assessments and implementation
+
+## SEO Optimizations
+
+- Comprehensive meta tags and Open Graph data for social sharing
+- JSON-LD structured data for enhanced search engine visibility
+- Semantic HTML structure with proper heading hierarchy
+- Mobile-responsive design with viewport optimization
+- Fast loading performance and image optimization
+- Clean URLs and canonical tags
+- Local business schema markup for Switzerland market
+
+## Security Features
+
+- **reCAPTCHA v3 Integration**: Advanced spam protection for contact forms
+- **Cookie Consent Management**: GDPR-compliant privacy controls
+- **Secure Contact Form**: Email validation and server-side verification
+- **Data Protection**: Secure handling of user information
+
+## Contact Information
+
+- **Phone**: +41 79 887 4423
+- **Email**: Nico.krizic@knicc.shop
+- **Website**: https://knicc.ch
+- **Service Area**: Switzerland
+
+## Technologies Used
+
+- **Frontend**: React + TypeScript, Tailwind CSS
+- **Backend**: Supabase (Database, Authentication, Edge Functions)
+- **Email Service**: Resend for reliable email delivery
+- **Analytics**: Google Analytics with privacy controls
+- **Security**: Google reCAPTCHA v3
+- **Icons**: Lucide React Icons
+- **Build Tool**: Vite for fast development and deployment
+
+## Key Features
+
+- Responsive design that works on all devices
+- Real-time contact form with email delivery
+- Cookie consent management with user preferences
+- Blog system for sharing IT insights and updates
+- Service showcase with expandable detailed offerings
+- Professional design with smooth animations and transitions
+
+---
+
+## Development
+
+This project is built with Lovable and can be deployed using:
 
 **URL**: https://lovable.dev/projects/894b7f6d-49d8-4144-b8af-8213c0a931ab
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/894b7f6d-49d8-4144-b8af-8213c0a931ab) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Local Development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Deployment
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Simply open [Lovable](https://lovable.dev/projects/894b7f6d-49d8-4144-b8af-8213c0a931ab) and click on Share → Publish.
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/894b7f6d-49d8-4144-b8af-8213c0a931ab) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+For custom domains, navigate to Project > Settings > Domains and click Connect Domain.

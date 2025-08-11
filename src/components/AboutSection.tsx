@@ -10,6 +10,12 @@ const achievements = [
 ];
 
 const AboutSection = () => {
+  const handleContactClick = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   return (
     <section id="about" className="py-20 bg-gradient-to-r from-background via-secondary/20 to-background">
       <div className="container mx-auto px-4">
@@ -50,6 +56,7 @@ const AboutSection = () => {
 
             <Button 
               size="lg" 
+              onClick={handleContactClick}
               className="bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent text-accent-foreground font-semibold px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
               Let's Work Together

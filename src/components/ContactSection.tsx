@@ -84,7 +84,7 @@ const ContactSection = () => {
             Get In <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Touch</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Ready to solve your IT challenges? Let's discuss your project and find the perfect solution.
+            Ready to solve your IT challenges? Contact Nico IT Services for expert solutions in Switzerland. Fast response within 2 hours guaranteed.
           </p>
         </div>
 

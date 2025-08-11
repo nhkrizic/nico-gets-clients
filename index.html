@@ -3,19 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nico IT Services - Professional Web Development & IT Solutions | knicc.ch</title>
-    <meta name="description" content="Professional IT services, web development, computer repairs and technical solutions in Switzerland. Expert IT support with Swiss precision and quality." />
-    <meta name="author" content="Nico - knicc.ch" />
-    <meta name="keywords" content="IT services, web development, computer repair, Switzerland, technical support, network security" />
+    <title>Nico IT Services - Professional Web Development & IT Solutions | Switzerland</title>
+    <meta name="description" content="Expert IT services in Switzerland - Web development, computer repairs, network security, and technical support. Fast, reliable solutions with Swiss precision. Contact us for free consultation." />
+    <meta name="author" content="Nico Krizic - knicc.ch" />
+    <meta name="keywords" content="IT services Switzerland, web development, computer repair, network security, technical support, Swiss IT solutions, Nico Krizic, knicc.ch" />
+    <link rel="canonical" href="https://knicc.ch" />
 
     <meta property="og:title" content="Nico IT Services - Professional Web Development & IT Solutions" />
-    <meta property="og:description" content="Professional IT services, web development, computer repairs and technical solutions in Switzerland. Expert IT support with Swiss precision and quality." />
+    <meta property="og:description" content="Expert IT services in Switzerland - Web development, computer repairs, network security, and technical support. Fast, reliable solutions with Swiss precision." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://knicc.ch" />
+    <meta property="og:image" content="https://knicc.ch/og-image.jpg" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Nico IT Services" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:title" content="Nico IT Services - Professional IT Solutions Switzerland" />
+    <meta name="twitter:description" content="Expert IT services, web development, and technical support in Switzerland. Fast, reliable solutions with Swiss precision." />
+    <meta name="twitter:image" content="https://knicc.ch/og-image.jpg" />
 
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R18MHW9CCC"></script>
@@ -32,6 +37,91 @@
 
   <body>
     <div id="root"></div>
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Nico IT Services",
+      "alternateName": "knicc.ch",
+      "description": "Professional IT services, web development, computer repairs and technical solutions in Switzerland",
+      "url": "https://knicc.ch",
+      "telephone": "+41798874423",
+      "email": "Nico.krizic@knicc.shop",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CH",
+        "addressRegion": "Switzerland"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "addressCountry": "CH"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday", 
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      "serviceArea": {
+        "@type": "Country",
+        "name": "Switzerland"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "IT Services",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Web Development",
+              "description": "Custom websites and web applications built with modern technologies"
+            }
+          },
+          {
+            "@type": "Offer", 
+            "itemOffered": {
+              "@type": "Service",
+              "name": "IT Repairs & Support",
+              "description": "Professional computer and device repairs, hardware troubleshooting"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service", 
+              "name": "Network & Security",
+              "description": "Network setup and cybersecurity solutions"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Mobile Solutions", 
+              "description": "Mobile app development and device management"
+            }
+          }
+        ]
+      },
+      "sameAs": [
+        "https://knicc.ch"
+      ],
+      "founder": {
+        "@type": "Person",
+        "name": "Nico Krizic"
+      }
+    }
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
