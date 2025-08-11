@@ -130,9 +130,39 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
   };
 
   const handleLike = (postId: string) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "You must be logged in to like posts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setPosts(prev => prev.map(post => 
       post.id === postId ? { ...post, likes: post.likes + 1 } : post
     ));
+
+    toast({
+      title: "Post Liked!",
+      description: "Thanks for your feedback.",
+    });
+  };
+
+  const handleComment = () => {
+    if (!user) {
+      toast({
+        title: "Login Required", 
+        description: "You must be logged in to comment on posts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Coming Soon",
+      description: "Comment functionality will be available soon!",
+    });
   };
 
   return (
@@ -253,7 +283,12 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleLike(post.id)}
-                              className="text-muted-foreground hover:text-red-500 transition-colors"
+                              className={`transition-colors ${
+                                user 
+                                  ? "text-muted-foreground hover:text-red-500" 
+                                  : "text-muted-foreground/50 cursor-not-allowed"
+                              }`}
+                              disabled={!user}
                             >
                               <Heart className="w-4 h-4 mr-1" />
                               {post.likes}
@@ -261,7 +296,13 @@ const BlogModal = ({ isOpen, onClose }: BlogModalProps) => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-muted-foreground hover:text-primary transition-colors"
+                              onClick={handleComment}
+                              className={`transition-colors ${
+                                user 
+                                  ? "text-muted-foreground hover:text-primary" 
+                                  : "text-muted-foreground/50 cursor-not-allowed"
+                              }`}
+                              disabled={!user}
                             >
                               <MessageSquare className="w-4 h-4 mr-1" />
                               {post.comments}

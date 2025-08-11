@@ -28,7 +28,7 @@ const Index = () => {
       
       <HeroSection />
       <ServicesSection />
-      <RecentPostsSection />
+      <RecentPostsSection onBlogClick={() => setBlogModalOpen(true)} />
       <AboutSection />
       <ContactSection />
       <Footer />

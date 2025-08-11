@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Calendar, User, MessageSquare, Heart, Share2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface BlogPost {
   id: string;
@@ -49,7 +51,50 @@ const mockRecentPosts: BlogPost[] = [
   }
 ];
 
-const RecentPostsSection = () => {
+interface RecentPostsSectionProps {
+  onBlogClick: () => void;
+}
+
+const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [posts, setPosts] = useState(mockRecentPosts);
+  const handleLike = (postId: string) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "You must be logged in to like posts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPosts(prev => prev.map(post => 
+      post.id === postId ? { ...post, likes: post.likes + 1 } : post
+    ));
+
+    toast({
+      title: "Post Liked!",
+      description: "Thanks for your feedback.",
+    });
+  };
+
+  const handleComment = () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "You must be logged in to comment on posts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Coming Soon",
+      description: "Comment functionality will be available soon!",
+    });
+  };
+
   return (
     <section className="py-20 bg-gradient-to-b from-background to-card/20">
       <div className="container mx-auto px-6">
@@ -63,7 +108,7 @@ const RecentPostsSection = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {mockRecentPosts.map((post) => (
+          {posts.map((post) => (
             <Card key={post.id} className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-card to-card/50 border-border">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start mb-2">
@@ -90,16 +135,36 @@ const RecentPostsSection = () => {
                   {post.content}
                 </CardDescription>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <div className="flex space-x-4">
-                    <span className="flex items-center text-sm text-muted-foreground">
-                      <Heart className="w-4 h-4 mr-1" />
-                      {post.likes}
-                    </span>
-                    <span className="flex items-center text-sm text-muted-foreground">
-                      <MessageSquare className="w-4 h-4 mr-1" />
-                      {post.comments}
-                    </span>
-                  </div>
+                        <div className="flex space-x-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleLike(post.id)}
+                            className={`transition-colors ${
+                              user 
+                                ? "text-muted-foreground hover:text-red-500" 
+                                : "text-muted-foreground/50 cursor-not-allowed"
+                            }`}
+                            disabled={!user}
+                          >
+                            <Heart className="w-4 h-4 mr-1" />
+                            {post.likes}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleComment}
+                            className={`transition-colors ${
+                              user 
+                                ? "text-muted-foreground hover:text-primary" 
+                                : "text-muted-foreground/50 cursor-not-allowed"
+                            }`}
+                            disabled={!user}
+                          >
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            {post.comments}
+                          </Button>
+                        </div>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -118,6 +183,7 @@ const RecentPostsSection = () => {
           <Button 
             variant="outline"
             className="hover:bg-primary/10 hover:text-primary hover:border-primary transition-colors"
+            onClick={onBlogClick}
           >
             <BookOpen className="w-4 h-4 mr-2" />
             View All Posts
