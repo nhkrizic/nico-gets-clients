@@ -1,1 +1,7 @@
 project_id = "cesqzqdqsgflioyrjvuh"
+
+[functions.process-payment]
+verify_jwt = false
+
+[functions.paypal-return]
+verify_jwt = false

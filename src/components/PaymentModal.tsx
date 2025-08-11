@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, Smartphone, Shield, Check, Star, Clock, Euro } from "lucide-react";
+import { CreditCard, Smartphone, Shield, Check, Star, Clock, Euro, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -50,6 +51,7 @@ const services = [
 const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
   const [selectedService, setSelectedService] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card');
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
   const handlePayment = async (method: 'card' | 'paypal') => {
@@ -63,24 +65,74 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
     }
 
     const service = services.find(s => s.id === selectedService);
-    
-    // Connect to your backend payment API
-    if (method === 'card') {
-      // Redirect to Stripe or your payment processor
-      toast({
-        title: "Redirecting to Secure Payment",
-        description: `Processing CHF ${service?.price} payment via credit card...`,
+    if (!service) return;
+
+    setIsProcessing(true);
+
+    try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to make a payment.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const totalAmount = service.price + Math.round(service.price * 0.081);
+
+      // Call the payment processing edge function
+      const { data, error } = await supabase.functions.invoke('process-payment', {
+        body: {
+          paymentMethod: method,
+          amount: totalAmount * 100, // Convert to cents
+          currency: 'chf',
+          serviceId: service.id,
+          userId: user.id,
+          appointmentId: null // Optional: can be linked to an appointment later
+        }
       });
-      
-      // Example: window.open('your-stripe-checkout-url', '_blank');
-    } else {
-      // Redirect to PayPal
+
+      if (error) {
+        console.error('Payment error:', error);
+        throw new Error(error.message || 'Payment failed');
+      }
+
+      if (data.success) {
+        if (method === 'paypal' && data.approvalUrl) {
+          // Redirect to PayPal for approval
+          toast({
+            title: "Redirecting to PayPal",
+            description: "You will be redirected to PayPal to complete your payment.",
+          });
+          
+          // Open PayPal in new tab
+          window.open(data.approvalUrl, '_blank', 'noopener,noreferrer');
+          
+          // Close the modal
+          onClose();
+        } else if (method === 'card') {
+          // Card payment completed
+          toast({
+            title: "Payment Successful!",
+            description: `Your ${service.name} payment has been processed successfully.`,
+          });
+          onClose();
+        }
+      } else {
+        throw new Error(data.error || 'Payment processing failed');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
       toast({
-        title: "Redirecting to PayPal",
-        description: `Processing CHF ${service?.price} payment via PayPal...`,
+        title: "Payment Failed",
+        description: error instanceof Error ? error.message : 'An error occurred while processing your payment.',
+        variant: "destructive",
       });
-      
-      // Example: window.open('your-paypal-checkout-url', '_blank');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -268,18 +320,38 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
               {paymentMethod === 'card' ? (
                 <Button
                   onClick={() => handlePayment('card')}
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={isProcessing}
+                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CreditCard className="mr-2 h-5 w-5" />
-                  Pay with Credit Card
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="mr-2 h-5 w-5" />
+                      Pay with Credit Card
+                    </>
+                  )}
                 </Button>
               ) : (
                 <Button
                   onClick={() => handlePayment('paypal')}
-                  className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent text-accent-foreground font-semibold py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={isProcessing}
+                  className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent text-accent-foreground font-semibold py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Smartphone className="mr-2 h-5 w-5" />
-                  Pay with PayPal
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Smartphone className="mr-2 h-5 w-5" />
+                      Pay with PayPal
+                    </>
+                  )}
                 </Button>
               )}
 
