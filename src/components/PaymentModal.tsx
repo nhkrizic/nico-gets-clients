@@ -94,25 +94,21 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
       }
 
       if (data.success) {
-        if (method === 'paypal' && data.approvalUrl) {
-          // Redirect to PayPal for approval
+        if (data.approvalUrl) {
+          // Both PayPal and card payments go through PayPal checkout
+          const paymentType = method === 'paypal' ? 'PayPal' : 'secure payment processing'
           toast({
-            title: "Redirecting to PayPal",
-            description: "You will be redirected to PayPal to complete your payment.",
+            title: `Redirecting to ${paymentType}`,
+            description: "You will be redirected to complete your payment securely.",
           });
           
-          // Open PayPal in new tab
+          // Open PayPal checkout in new tab (allows both PayPal and card payments)
           window.open(data.approvalUrl, '_blank', 'noopener,noreferrer');
           
           // Close the modal
           onClose();
-        } else if (method === 'card') {
-          // Card payment completed
-          toast({
-            title: "Payment Successful!",
-            description: `Your ${service.name} payment has been processed successfully.`,
-          });
-          onClose();
+        } else {
+          throw new Error('No payment URL received');
         }
       } else {
         throw new Error(data.error || 'Payment processing failed');

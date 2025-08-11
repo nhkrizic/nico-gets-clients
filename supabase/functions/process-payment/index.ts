@@ -117,34 +117,70 @@ serve(async (req) => {
         })
       }
     } else if (paymentMethod === 'card') {
-      // For now, simulate card payment success
-      // In a real implementation, you would integrate with a card processor
-      const { data: payment, error: paymentError } = await supabase
-        .from('payments')
-        .insert({
-          user_id: userId, // Can be null for guest payments
-          amount: amount,
-          currency: currency,
-          payment_method: 'card',
-          payment_status: 'completed',
-          transaction_id: `card_${crypto.randomUUID()}`,
-          appointment_id: appointmentId
+      // Use PayPal for credit card processing as well
+      const accessToken = await getPayPalAccessToken()
+      
+      // Create PayPal order for credit card payment (same as PayPal flow)
+      const orderResponse = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'PayPal-Request-Id': crypto.randomUUID()
+        },
+        body: JSON.stringify({
+          intent: 'CAPTURE',
+          purchase_units: [{
+            amount: {
+              currency_code: currency.toUpperCase(),
+              value: (amount / 100).toFixed(2)
+            },
+            description: `IT Service Payment - Service ID: ${serviceId}`
+          }],
+          application_context: {
+            return_url: 'https://cesqzqdqsgflioyrjvuh.supabase.co/functions/v1/process-payment/success',
+            cancel_url: 'https://cesqzqdqsgflioyrjvuh.supabase.co/functions/v1/process-payment/cancel'
+          }
         })
-        .select()
-        .single()
-
-      if (paymentError) {
-        console.error('Error saving payment:', paymentError)
-        throw new Error('Failed to save payment record')
-      }
-
-      return new Response(JSON.stringify({
-        success: true,
-        paymentId: payment.id,
-        message: 'Card payment processed successfully'
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
+
+      const orderData = await orderResponse.json()
+      console.log('PayPal order created for card payment:', orderData)
+
+      if (orderData.id) {
+        // Save payment record to database
+        const { data: payment, error: paymentError } = await supabase
+          .from('payments')
+          .insert({
+            user_id: userId, // Can be null for guest payments
+            amount: amount,
+            currency: currency,
+            payment_method: 'card',
+            payment_status: 'pending', // Changed to pending until payment is completed
+            transaction_id: orderData.id,
+            appointment_id: appointmentId
+          })
+          .select()
+          .single()
+
+        if (paymentError) {
+          console.error('Error saving card payment:', paymentError)
+          throw new Error('Failed to save payment record')
+        }
+
+        // Return the approval URL for PayPal checkout (allows both PayPal and card payments)
+        const approvalUrl = orderData.links?.find((link: any) => link.rel === 'approve')?.href
+        
+        return new Response(JSON.stringify({
+          success: true,
+          paymentId: payment.id,
+          approvalUrl: approvalUrl,
+          orderId: orderData.id,
+          message: 'Redirecting to secure payment processing'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
     }
 
     throw new Error('Invalid payment method')
