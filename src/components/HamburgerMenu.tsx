@@ -8,11 +8,10 @@ interface HamburgerMenuProps {
   onLoginClick: () => void;
   onChatClick: () => void;
   onBlogClick: () => void;
-  onBookingClick: () => void;
   onPaymentClick: () => void;
 }
 
-const HamburgerMenu = ({ onLoginClick, onChatClick, onBlogClick, onBookingClick, onPaymentClick }: HamburgerMenuProps) => {
+const HamburgerMenu = ({ onLoginClick, onChatClick, onBlogClick, onPaymentClick }: HamburgerMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleMenuClick = (action: () => void) => {
@@ -64,6 +63,7 @@ const HamburgerMenu = ({ onLoginClick, onChatClick, onBlogClick, onBookingClick,
                 <Button
                   variant="ghost"
                   className="w-full justify-start hover:bg-accent/10 hover:text-accent transition-colors"
+                  onClick={() => handleMenuClick(onLoginClick)}
                 >
                   <UserPlus className="mr-3 h-5 w-5" />
                   Register Account
@@ -89,14 +89,6 @@ const HamburgerMenu = ({ onLoginClick, onChatClick, onBlogClick, onBookingClick,
                   <span className="ml-auto text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
                     AI Assistant
                   </span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start hover:bg-accent/10 hover:text-accent transition-colors"
-                  onClick={() => handleMenuClick(onBookingClick)}
-                >
-                  <Calendar className="mr-3 h-5 w-5" />
-                  Book Appointment
                 </Button>
                 <Button
                   variant="ghost"

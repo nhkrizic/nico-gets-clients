@@ -7,14 +7,12 @@ import Footer from "@/components/Footer";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import AuthModal from "@/components/AuthModal";
 import LiveChatModal from "@/components/LiveChatModal";
-import BookingModal from "@/components/BookingModal";
 import PaymentModal from "@/components/PaymentModal";
 import BlogModal from "@/components/BlogModal";
 
 const Index = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [chatModalOpen, setChatModalOpen] = useState(false);
-  const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [blogModalOpen, setBlogModalOpen] = useState(false);
 
@@ -24,7 +22,6 @@ const Index = () => {
         onLoginClick={() => setLoginModalOpen(true)}
         onChatClick={() => setChatModalOpen(true)}
         onBlogClick={() => setBlogModalOpen(true)}
-        onBookingClick={() => setBookingModalOpen(true)}
         onPaymentClick={() => setPaymentModalOpen(true)}
       />
       
@@ -37,7 +34,6 @@ const Index = () => {
       {/* Modals */}
       <AuthModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
       <LiveChatModal isOpen={chatModalOpen} onClose={() => setChatModalOpen(false)} />
-      <BookingModal isOpen={bookingModalOpen} onClose={() => setBookingModalOpen(false)} />
       <PaymentModal isOpen={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} />
       <BlogModal isOpen={blogModalOpen} onClose={() => setBlogModalOpen(false)} />
     </div>
