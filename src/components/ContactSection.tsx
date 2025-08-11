@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -14,16 +15,54 @@ const ContactSection = () => {
     service: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real implementation, this would send the data to a backend
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for your message. I'll get back to you within 2 hours.",
-    });
-    setFormData({ name: '', email: '', phone: '', service: '', message: '' });
+    setIsSubmitting(true);
+
+    try {
+      // Get reCAPTCHA token
+      const token = await new Promise<string>((resolve, reject) => {
+        if (typeof window !== 'undefined' && window.grecaptcha) {
+          window.grecaptcha.ready(() => {
+            window.grecaptcha.execute('6LeM0H8qAAAAAJ3B821GaLoeHvywDkWPNngU4Ldh', { action: 'submit' })
+              .then(resolve)
+              .catch(reject);
+          });
+        } else {
+          reject(new Error('reCAPTCHA not loaded'));
+        }
+      });
+
+      // Send email via Supabase edge function
+      const { error } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          ...formData,
+          recaptchaToken: token
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your message. I'll get back to you within 2 hours.",
+      });
+      setFormData({ name: '', email: '', phone: '', service: '', message: '' });
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again or call directly.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -34,7 +73,7 @@ const ContactSection = () => {
   };
 
   const handleCallClick = () => {
-    window.location.href = 'tel:+41761234567'; // Replace with actual phone number
+    window.location.href = 'tel:+41798874423';
   };
 
   return (
@@ -67,7 +106,7 @@ const ContactSection = () => {
                       onClick={handleCallClick}
                       className="text-primary hover:text-primary/80 transition-colors cursor-pointer"
                     >
-                      +41 76 123 4567
+                      +41 79 887 4423
                     </button>
                   </div>
                 </div>
@@ -210,10 +249,11 @@ const ContactSection = () => {
                   <Button 
                     type="submit" 
                     size="lg"
-                    className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <Send className="mr-2 h-5 w-5" />
-                    Send Message
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                   </Button>
                 </form>
               </CardContent>

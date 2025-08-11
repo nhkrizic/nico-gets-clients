@@ -3,6 +3,10 @@ import { Phone, ArrowRight } from "lucide-react";
 import heroDarkImage from "@/assets/hero-dark.jpg";
 
 const HeroSection = () => {
+  const handleCallClick = () => {
+    window.location.href = 'tel:+41798874423';
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
       {/* Background with gradient overlay */}
@@ -41,6 +45,7 @@ const HeroSection = () => {
             <Button 
               variant="outline" 
               size="lg"
+              onClick={handleCallClick}
               className="border-border text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary font-semibold px-8 py-6 text-lg rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-card"
             >
               <Phone className="mr-2 h-5 w-5" />
