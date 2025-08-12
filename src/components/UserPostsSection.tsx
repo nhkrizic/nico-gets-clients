@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Calendar, User, MessageSquare, Heart, Share2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useBlog } from "@/hooks/useBlog";
 import CommentModal from "@/components/CommentModal";
 import ShareModal from "@/components/ShareModal";
@@ -16,8 +16,8 @@ interface RecentPostsSectionProps {
 const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { posts, loading = false, toggleLike, fetchComments, addComment } = useBlog();
-  
+  const { posts, loading = false, toggleLike, fetchComments, addComment, refetchPosts } = useBlog();
+
   const [commentModal, setCommentModal] = useState<{
     isOpen: boolean;
     postId: string;
@@ -25,20 +25,26 @@ const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
     comments: any[];
   }>({
     isOpen: false,
-    postId: '',
-    postTitle: '',
-    comments: []
+    postId: "",
+    postTitle: "",
+    comments: [],
   });
-  
+
   const [shareModal, setShareModal] = useState<{
     isOpen: boolean;
     postTitle: string;
     postContent: string;
   }>({
     isOpen: false,
-    postTitle: '',
-    postContent: ''
+    postTitle: "",
+    postContent: "",
   });
+
+  // Make sure we have fresh posts on landing
+  useEffect(() => {
+    if (!posts?.length) refetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const displayPosts = posts.slice(0, 3); // Show only first 3 posts
 
@@ -57,7 +63,7 @@ const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
       isOpen: true,
       postId,
       postTitle,
-      comments
+      comments,
     });
   };
 
@@ -65,7 +71,7 @@ const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
     setShareModal({
       isOpen: true,
       postTitle,
-      postContent
+      postContent,
     });
   };
 
@@ -88,83 +94,112 @@ const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {displayPosts.map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-card to-card/50 border-border">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
-                      Tech Post
-                    </Badge>
+            {displayPosts.map((post) => {
+              const authorLabel =
+                (post.author?.full_name && post.author.full_name.trim()) ||
+                post.author?.email ||
+                "Anonymous";
+              const img = post.images && post.images.length ? post.images[0] : null;
+
+              return (
+                <Card
+                  key={post.id}
+                  className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-card to-card/50 border-border overflow-hidden"
+                >
+                  {/* Thumbnail */}
+                  <div className="aspect-[16/9] bg-muted">
+                    {img ? (
+                      <img
+                        src={img}
+                        alt={post.title}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                        No image
+                      </div>
+                    )}
                   </div>
-                  <CardTitle className="text-xl hover:text-primary transition-colors cursor-pointer">
-                    {post.title}
-                  </CardTitle>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                    <span className="flex items-center">
-                      <User className="w-4 h-4 mr-1" />
-                      Anonymous
-                    </span>
-                    <span className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base leading-relaxed mb-4">
-                    {post.content.length > 150 ? `${post.content.substring(0, 150)}...` : post.content}
-                  </CardDescription>
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <div className="flex space-x-4">
+
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
+                        Tech Post
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-xl hover:text-primary transition-colors cursor-pointer">
+                      {post.title}
+                    </CardTitle>
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <span className="flex items-center">
+                        <User className="w-4 h-4 mr-1" />
+                        {authorLabel}
+                      </span>
+                      <span className="flex items-center">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent>
+                    <CardDescription className="text-base leading-relaxed mb-4 line-clamp-3 whitespace-pre-wrap">
+                      {post.excerpt || post.content}
+                    </CardDescription>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
+                      <div className="flex space-x-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleLike(post.id)}
+                          className={`transition-colors ${
+                            user
+                              ? post.user_has_liked
+                                ? "text-red-500 hover:text-red-600"
+                                : "text-muted-foreground hover:text-red-500"
+                              : "text-muted-foreground/50 cursor-not-allowed"
+                          }`}
+                          disabled={!user}
+                        >
+                          <Heart className={`w-4 h-4 mr-1 ${post.user_has_liked ? "fill-current" : ""}`} />
+                          {post.likes_count || 0}
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleComment(post.id, post.title)}
+                          className={`transition-colors ${
+                            user ? "text-muted-foreground hover:text-primary" : "text-muted-foreground/50 cursor-not-allowed"
+                          }`}
+                          disabled={!user}
+                        >
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          {post.comments_count || 0}
+                        </Button>
+                      </div>
+
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleLike(post.id)}
-                        className={`transition-colors ${
-                          user 
-                            ? post.user_has_liked
-                              ? "text-red-500 hover:text-red-600"
-                              : "text-muted-foreground hover:text-red-500"
-                            : "text-muted-foreground/50 cursor-not-allowed"
-                        }`}
-                        disabled={!user}
+                        onClick={() => handleShare(post.title, post.content)}
+                        className="text-muted-foreground hover:text-accent transition-colors"
                       >
-                        <Heart className={`w-4 h-4 mr-1 ${post.user_has_liked ? 'fill-current' : ''}`} />
-                        {post.likes_count || 0}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleComment(post.id, post.title)}
-                        className={`transition-colors ${
-                          user 
-                            ? "text-muted-foreground hover:text-primary" 
-                            : "text-muted-foreground/50 cursor-not-allowed"
-                        }`}
-                        disabled={!user}
-                      >
-                        <MessageSquare className="w-4 h-4 mr-1" />
-                        {post.comments_count || 0}
+                        <Share2 className="w-4 h-4 mr-1" />
+                        Share
                       </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleShare(post.title, post.content)}
-                      className="text-muted-foreground hover:text-accent transition-colors"
-                    >
-                      <Share2 className="w-4 h-4 mr-1" />
-                      Share
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
         <div className="text-center mt-12">
-          <Button 
+          <Button
             variant="outline"
             className="hover:bg-primary/10 hover:text-primary hover:border-primary transition-colors"
             onClick={onBlogClick}
@@ -177,7 +212,7 @@ const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
         {/* Comment Modal */}
         <CommentModal
           isOpen={commentModal.isOpen}
-          onClose={() => setCommentModal(prev => ({ ...prev, isOpen: false }))}
+          onClose={() => setCommentModal((prev) => ({ ...prev, isOpen: false }))}
           postId={commentModal.postId}
           postTitle={commentModal.postTitle}
           comments={commentModal.comments}
@@ -188,7 +223,7 @@ const RecentPostsSection = ({ onBlogClick }: RecentPostsSectionProps) => {
         {/* Share Modal */}
         <ShareModal
           isOpen={shareModal.isOpen}
-          onClose={() => setShareModal(prev => ({ ...prev, isOpen: false }))}
+          onClose={() => setShareModal((prev) => ({ ...prev, isOpen: false }))}
           postTitle={shareModal.postTitle}
           postContent={shareModal.postContent}
         />
