@@ -13,8 +13,8 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <Globe className="h-8 w-8" />
-              <span className="text-2xl font-bold">knicc.ch</span>
+	      <img src="/favicon.ico" alt="Knicc Logo" className="h-8 w-8" />
+              <span className="text-2xl font-bold">Knicc</span>
             </div>
             <p className="text-primary-foreground/80 mb-6 leading-relaxed">
               Professional IT services and web development solutions delivered with Swiss precision and quality.
@@ -26,12 +26,6 @@ const Footer = () => {
                 className="text-primary-foreground/80"
               />
             </div>
-            <Button 
-              variant="outline" 
-              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground hover:text-primary rounded-full"
-            >
-              Get Free Quote
-            </Button>
           </div>
 
           {/* Services */}
@@ -52,14 +46,14 @@ const Footer = () => {
             <div className="space-y-3 text-primary-foreground/80">
               <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4" />
-                <a href="tel:+41761234567" className="hover:text-primary-foreground transition-colors">
-                  +41 76 123 4567
+                <a href="tel:+41798874423" className="hover:text-primary-foreground transition-colors">
+                  +41 79 887 4423
                 </a>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4" />
-                <a href="mailto:nico@knicc.ch" className="hover:text-primary-foreground transition-colors">
-                  nico@knicc.ch
+                <a href="mailto:nico.krizic@knicc.shop" className="hover:text-primary-foreground transition-colors">
+                  nico.krizic@knicc.shop
                 </a>
               </div>
               <div className="flex items-center space-x-3">
@@ -76,7 +70,6 @@ const Footer = () => {
               <li><a href="#about" className="hover:text-primary-foreground transition-colors">About</a></li>
               <li><a href="#services" className="hover:text-primary-foreground transition-colors">Services</a></li>
               <li><a href="#contact" className="hover:text-primary-foreground transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Portfolio</a></li>
               <li><a href="#" className="hover:text-primary-foreground transition-colors">Blog</a></li>
             </ul>
           </div>
@@ -86,7 +79,7 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center text-primary-foreground/80">
           <div className="mb-4 md:mb-0">
-            <p>&copy; {currentYear} knicc.ch - Nico IT Services. All rights reserved.</p>
+            <p>&copy; {currentYear} knicc.ch - Knicc IT Services. All rights reserved.</p>
           </div>
           <div className="flex space-x-6">
             <a href="#" className="hover:text-primary-foreground transition-colors">Privacy Policy</a>
